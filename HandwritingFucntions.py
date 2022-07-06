@@ -429,6 +429,6 @@ class Write_Pages:
                     page.save('.//' + self.Project_Name + '//' + str(pageIndex) + '.jpg')
 
             if (needPDF):
-                pages[0].convert('RGB').save('.//' + self.Project_Name + '//' + 'myPDF.pdf', save_all=True,
+                pages[0].convert('RGB').save('.//' + self.Project_Name + '//' +self.Project_Name +'.pdf', save_all=True,
                                              append_images=pages[1:])
 

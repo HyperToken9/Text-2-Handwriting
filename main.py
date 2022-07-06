@@ -3,7 +3,7 @@ import time
 
 def main():
 
-    projectName = "Exercise1"
+    projectName = 'Minecraft'#"EVS Assignment"
 
     stamp = """Name: Nathan Adrian Saldanha
     Reg. No.: 1234567
@@ -14,7 +14,7 @@ def main():
 
     if (text == ''):
         # Open File
-        text_file = open('.//' + projectName + '.txt', "r", encoding="utf-8-sig")
+        text_file = open('.//'+projectName+'//' + projectName + '.txt', "r", encoding="utf-8-sig")
 
         # Read Text
         text = text_file.read()[:]

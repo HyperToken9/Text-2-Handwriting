@@ -1,4 +1,4 @@
-import HandwritingFucntions as hf
+import HandwritingFunctions as hf
 import time
 
 def main():

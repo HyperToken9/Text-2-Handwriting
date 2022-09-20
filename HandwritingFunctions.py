@@ -2,14 +2,13 @@ from PIL import Image
 import os, random, pickle, time
 
 tree_name = 'Character Tree'
-
+resource_folder = 'Resources'
+tree_path = os.path.join(resource_folder, tree_name)
 
 ## Hold Meta Data For Each Character's Image
 class ImageObject:
 
     def __init__(self, image, offset, lHug, rHug):
-
-        global tree_name
 
         # the image itself
         self.Image = image
@@ -22,10 +21,6 @@ class ImageObject:
 
         # how many pixels does the char need to be pushed toward the right ( in  order to hug the neighbouring chars better)
         self.rightHug = rHug
-
-
-
-
 
     # Stitches 2 Images Together
     def __add__(self, newImageObj):
@@ -104,7 +99,7 @@ class Write_Line:
     # Fetches Character Image From Directory
     def getAlphabet(self, a):
 
-        global tree_name
+        global tree_path
 
         # print(a)
         # Dictionary of characters that windows doesnot allow to be used as folder names
@@ -131,10 +126,10 @@ class Write_Line:
         if (a >= 'a' and a <= 'z'):
             a = '_' + a
 
-        path = './/' + tree_name + '//' + a
+        path = './/' + tree_path + '//' + a
 
         if (a in specialDict.keys()):
-            path = './/' + tree_name + '//__//' + specialDict[a]
+            path = './/' + tree_path + '//__//' + specialDict[a]
 
         # List of all the images at that destination
         files = os.listdir(path)
@@ -199,7 +194,8 @@ def resize(image, percentageChangeX, percentageChangeY):
 
     return new_image
 
-with open('.//' + tree_name +'//WIDTHS.pickle', 'rb') as handle:
+
+with open(os.path.join(resource_folder, tree_name, "WIDTHS.pickle"), 'rb') as handle:
     size_dict = pickle.load(handle)
 # print(len(size_dict.keys()))
 
@@ -270,7 +266,7 @@ class Write_Pages:
     def generate_page(self, line_list):
 
         # Getting A Page
-        path = './/Papers//Pages'
+        path = os.path.join(resource_folder, './/Papers//Pages')
         files = os.listdir(path)
         file_index = random.randrange(0, len(files))
         # print(path+'//'+files[fileIndex])

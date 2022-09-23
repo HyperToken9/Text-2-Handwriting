@@ -32,7 +32,7 @@ def main():
 
     [need_stamp, need_pdf, need_images] = [True, True, True]
 
-    HandwritingFunctions.Write_Pages(project_name, text, stamp, [need_stamp, need_pdf, need_images])
+    HandwritingFunctions.WritePages(project_name, text, stamp, [need_stamp, need_pdf, need_images])
 
 
 if __name__ == '__main__':

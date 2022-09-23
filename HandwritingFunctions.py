@@ -1,33 +1,35 @@
+import os
+import pickle
+import random
+
 from PIL import Image
-import os, random, pickle, time
 
 tree_name = 'Character Tree'
 resource_folder = 'Resources'
 tree_path = os.path.join(resource_folder, tree_name)
 
-## Hold Meta Data For Each Character's Image
+
+# Hold Meta Data For Each Character's Image
 class ImageObject:
 
-    def __init__(self, image, offset, lHug, rHug):
-
+    def __init__(self, image, offset, left_hug, right_hug):
         # the image itself
         self.Image = image
 
         # how many pixels does the char need to be pushed down
         self.Offset = offset
 
-        # how many pixels does the char need to be pushed toward the left ( in order to hug the neighbouring chars better)
-        self.leftHug = lHug
+        # how many pixels does the char need to be pushed toward the left
+        self.leftHug = left_hug
 
-        # how many pixels does the char need to be pushed toward the right ( in  order to hug the neighbouring chars better)
-        self.rightHug = rHug
+        # how many pixels does the char need to be pushed toward the right
+        self.rightHug = right_hug
 
     # Stitches 2 Images Together
-    def __add__(self, newImageObj):
-
+    def __add__(self, img_obj):
         # The Images
         image1 = self.Image
-        image2 = newImageObj.Image
+        image2 = img_obj.Image
 
         # Convert Images to RGBA
         image1 = image1.convert("RGBA")
@@ -35,18 +37,18 @@ class ImageObject:
 
         # The Offsets of The Images
         image1_offset = self.Offset
-        image2_offset = newImageObj.Offset
+        image2_offset = img_obj.Offset
 
         # Left Hug of the 2nd Image
-        image2_LH = newImageObj.leftHug
+        image2_lh = img_obj.leftHug
 
         # Right Hug of the 1st Image
-        image1_RH = self.rightHug
+        image1_rh = self.rightHug
 
-        ## The above 2 metadata are the only ones relevant to generate the stitched image
+        # The above 2 metadata are the only ones relevant to generate the stitched image
 
-        # The right hug of the 2nd image is out residual metadat which is returned as part of the final image object
-        image2_RH = newImageObj.rightHug
+        # The right hug of the 2nd image is out residual metadata which is returned as part of the final image object
+        image2_rh = img_obj.rightHug
 
         # NOTE: The left hug of the 1st image is discarded
 
@@ -59,50 +61,39 @@ class ImageObject:
         image2_height = image2_size[1] - image2_offset
 
         # Parameters for dimensions of blank canvas
-        maxOffset = max(image1_offset, image2_offset)
-        maxHeight = max(image1_height, image2_height)
+        max_offset = max(image1_offset, image2_offset)
+        max_height = max(image1_height, image2_height)
 
-        # height = max(image1_size[1]- image1_offset, image2_size[1]- image2_offset)
-
-        # Creating A Blank Canvas, on which the images inputed will be pasted appropriately
+        # Creating A Blank Canvas, on which the images inputted will be pasted appropriately
         new_image = Image.new('RGBA',  # Image has R G B and an alpha channel
-                              (image1_size[0] + image2_size[0] - image1_RH - image2_LH, maxHeight + maxOffset),
+                              (image1_size[0] + image2_size[0] - image1_rh - image2_lh, max_height + max_offset),
                               # Dimensions calculations
-                              (250, 250, 250, 0))  # Trasnparent Canvas
+                              (250, 250, 250, 0))  # Transparent Canvas
 
-        new_image.paste(image1, (0, maxHeight - image1_height))
+        new_image.paste(image1, (0, max_height - image1_height))
 
-        new_image.paste(image2, (image1_size[0] - image1_RH - image2_LH, maxHeight - image2_height), image2)
-        new_image.paste(image2, (image1_size[0] - image1_RH - image2_LH, maxHeight - image2_height), image2)
+        new_image.paste(image2, (image1_size[0] - image1_rh - image2_lh, max_height - image2_height), image2)
+        new_image.paste(image2, (image1_size[0] - image1_rh - image2_lh, max_height - image2_height), image2)
 
-        # new_image.show()
-
-
-        # self.Image = new_image
-        # self.Offset = maxOffset
-        # self.leftHug = 0
-        # self.rightHug = 0
-
-        result = ImageObject(new_image, maxOffset, 0, image2_RH)
-
-        # return self
+        result = ImageObject(new_image, max_offset, 0, image2_rh)
 
         return result
 
-class Write_Line:
+
+class WriteLine:
 
     def __init__(self, line):
         # print('Line ',line)
         self.line_content = line
 
-
     # Fetches Character Image From Directory
-    def getAlphabet(self, a):
+    @staticmethod
+    def getAlphabet(a):
 
         global tree_path
 
         # print(a)
-        # Dictionary of characters that windows doesnot allow to be used as folder names
+        # Dictionary of characters that windows doesn't allow to be used as folder names
         specialDict = {' ': 'blank', '\\': 'backslash', ':': 'colon', '"': 'doubQu',
                        '/': 'forwardslash', '>': 'greaterthan', '<': 'lessthan', '.': 'period',
                        '|': 'pipe', '?': 'question', '*': 'star', '': 'thinBlank'
@@ -119,23 +110,23 @@ class Write_Line:
                       }
 
         # Assigning Offset values for chars if they exist
-        if (a in offsetDict.keys()):
+        if a in offsetDict.keys():
             [offset, lHug, rHug] = offsetDict[a]
 
         # Determining the path where the images of the char are stored depending on the value of the char
-        if (a >= 'a' and a <= 'z'):
+        if 'a' <= a <= 'z':
             a = '_' + a
 
         path = './/' + tree_path + '//' + a
 
-        if (a in specialDict.keys()):
+        if a in specialDict.keys():
             path = './/' + tree_path + '//__//' + specialDict[a]
 
         # List of all the images at that destination
         files = os.listdir(path)
 
         # If the location has any images
-        if (len(files) != 0):
+        if len(files) != 0:
 
             # we choose one randomly
             fileIndex = random.randrange(0, len(files))
@@ -154,7 +145,6 @@ class Write_Line:
 
         return result
 
-
     # Generates A Full Sentence
     def generate_line(self):
 
@@ -162,7 +152,7 @@ class Write_Line:
 
         # print('Word ',word)
 
-        if (len(word) < 2):
+        if len(word) < 2:
             base_imageObj = self.getAlphabet(word)
 
         else:
@@ -170,24 +160,22 @@ class Write_Line:
             # print('Base Image Obj',base_imageObj.Offset)
 
             for i in range(1, len(word)):
-
                 # print(word[i])
                 # print(self.getAlphabet(word[i]).rightHug)
                 base_imageObj = base_imageObj + self.getAlphabet(word[i])
-
 
         # base_imageObj.Image.show()
         return base_imageObj
 
 
-def resize(image, percentageChangeX, percentageChangeY):
+def resize(image, percentage_change_x, percentage_change_y):
     # Getting OG Size
     imageSizeX = image.size[0]
     imageSizeY = image.size[1]
 
     # Calculating New Size
-    newSizeX = (imageSizeX * percentageChangeX) / 100
-    newSizeY = (imageSizeY * percentageChangeY) / 100
+    newSizeX = (imageSizeX * percentage_change_x) / 100
+    newSizeY = (imageSizeY * percentage_change_y) / 100
 
     # Resizing
     new_image = image.resize((int(newSizeX), int(newSizeY)))
@@ -197,7 +185,7 @@ def resize(image, percentageChangeX, percentageChangeY):
 
 with open(os.path.join(resource_folder, tree_name, "WIDTHS.pickle"), 'rb') as handle:
     size_dict = pickle.load(handle)
-# print(len(size_dict.keys()))
+
 
 def lineSize(line):
     global size_dict
@@ -207,6 +195,7 @@ def lineSize(line):
         length += size_dict[i]
     return length
 
+
 def cutter(page):
     xCrop = random.randint(0, 150)
     yCrop = random.randint(0, 33)
@@ -215,14 +204,14 @@ def cutter(page):
 
     return page
 
-class Write_Pages:
 
-    def __init__(self, project_name,content, stamp, options):
+class WritePages:
+
+    def __init__(self, project_name, content, stamp, options):
 
         self.Project_Name = project_name
 
         self.Content = content
-
 
         self.Stamp = stamp
         self.Optionality = options
@@ -240,13 +229,13 @@ class Write_Pages:
         text = self.Content
         new_text = ''
         for i in range(len(text)):
-            if (text[i] in '“”'):  # double quote
+            if text[i] in '“”':  # double quote
                 a = '"'
-            elif (text[i] in "’’’‘"):  # single quote
+            elif text[i] in "’’’‘":  # single quote
                 a = "'"
-            elif (text[i] == '—' or text[i] == '–'):  # hyphen
+            elif text[i] in '—–':  # hyphen
                 a = '-'
-            elif (text[i] == '…'):  # elipses
+            elif text[i] == '…':  # ellipses
                 a = '...'
             else:
                 a = text[i]
@@ -254,7 +243,7 @@ class Write_Pages:
 
         newTextSplit = new_text.split('\n')
 
-        while (newTextSplit[-1] == ''):
+        while newTextSplit[-1] == '':
             newTextSplit = newTextSplit[:-1]
 
         separator = '\n'
@@ -273,10 +262,10 @@ class Write_Pages:
         pageImage = Image.open(path + '//' + files[file_index])
 
         # Setting Up The Page
-        new_image = Image.new('RGBA', (pageImage.size), (250, 250, 250, 0))
+        new_image = Image.new('RGBA', pageImage.size, (250, 250, 250, 0))
         new_image.paste(pageImage, (0, 0))
 
-        # Printing Each Line At Alloted Line Number
+        # Printing Each Line At Allotted Line Number
         for line in line_list:
             lineOffset = line[1].Offset
             lineImage = line[1].Image
@@ -292,7 +281,7 @@ class Write_Pages:
             new_image.paste(lineImage, (395 + variableStart, yCoord), mask=lineImage)
             # new_image.show()
 
-        if (self.Optionality[0]):
+        if self.Optionality[0]:
             new_image = self.stamper(new_image)
 
         new_image = cutter(new_image)
@@ -312,9 +301,9 @@ class Write_Pages:
 
         for paraIndex in range(len(paraList)):
             para = paraList[paraIndex]
-            if (para == ''):
+            if para == '':
                 lineNumber += 1
-                if (lineNumber > 27):
+                if lineNumber > 27:
                     # print('Tick 1')
                     self.generate_page(lineList)
                     lineList = []
@@ -329,8 +318,8 @@ class Write_Pages:
 
                 maxLineSize = 2150
 
-                if (lineLength > maxLineSize or charIndex == len(para) - 1):
-                    if (lineLength > maxLineSize):
+                if lineLength > maxLineSize or charIndex == len(para) - 1:
+                    if lineLength > maxLineSize:
                         oldLine = line
                         while line[-1] != ' ':
                             line = line[:-1]
@@ -339,7 +328,7 @@ class Write_Pages:
                         # print("end :" + para[-10:charIndex+1])
                         snippedOff = ''
 
-                    if (lineNumber > 27):
+                    if lineNumber > 27:
                         print("Printing Page " + str(len(self.Pages) + 1))
                         # print('Tick 2')
                         self.generate_page(lineList)
@@ -348,7 +337,7 @@ class Write_Pages:
                         lineList = []
                         lineNumber = 0
 
-                    finalLineImageObject = Write_Line(line).generate_line()
+                    finalLineImageObject = WriteLine(line).generate_line()
                     lineList.append([lineNumber, finalLineImageObject])
                     lineNumber += 1
 
@@ -356,7 +345,7 @@ class Write_Pages:
 
                     line = snippedOff
 
-                    if ((paraIndex == (len(paraList) - 1)) and charIndex == len(para) - 1):
+                    if (paraIndex == (len(paraList) - 1)) and charIndex == len(para) - 1:
                         # print('Tick 3')
                         self.generate_page(lineList)
                         lineList = []
@@ -371,11 +360,11 @@ class Write_Pages:
 
             lineSeparation = random.randint(90, 100)
             for lineIndex in range(numLines):
-                if (canvas == None):
+                if canvas is None:
                     # print('lines[lineIndex] ',lines[lineIndex])
-                    canvas = Write_Line(lines[lineIndex]).generate_line().Image
+                    canvas = WriteLine(lines[lineIndex]).generate_line().Image
                 else:
-                    canvasExt = Write_Line(lines[lineIndex]).generate_line().Image
+                    canvasExt = WriteLine(lines[lineIndex]).generate_line().Image
                     canvasSize = canvas.size
                     canvasExtSize = canvasExt.size
                     tilt = random.randint(0, 10)
@@ -411,10 +400,10 @@ class Write_Pages:
 
             pages[p] = resize(pages[p].convert('RGB'), 25, 25)
 
-        if (pages == []):
+        if not pages:
             print("No Pages To Print")
         else:
-            if (needImages):
+            if needImages:
                 path = './/' + self.Project_Name
                 if not os.path.isdir(path):
                     os.makedirs(path)
@@ -424,7 +413,7 @@ class Write_Pages:
                     page = pages[pageIndex]
                     page.save('.//' + self.Project_Name + '//' + str(pageIndex) + '.jpg')
 
-            if (needPDF):
-                pages[0].convert('RGB').save('.//' + self.Project_Name + '//' +self.Project_Name +'.pdf', save_all=True,
+            if needPDF:
+                pages[0].convert('RGB').save('.//' + self.Project_Name + '//' + self.Project_Name + '.pdf',
+                                             save_all=True,
                                              append_images=pages[1:])
-

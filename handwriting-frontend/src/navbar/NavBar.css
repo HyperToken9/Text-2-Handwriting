@@ -1,0 +1,20 @@
+
+.nav-wrapper{
+    background-color: #14213D;
+    /* width: 100vw; */
+    height: 15vh;
+    
+    /* display: flex;
+    align-items: center;
+    justify-content: space-between; */
+
+    /* margin-bottom: 3em; */
+    
+}
+
+.nav-logo{
+    /* margin-left: 3vw; */
+    height: 80%;
+}
+
+

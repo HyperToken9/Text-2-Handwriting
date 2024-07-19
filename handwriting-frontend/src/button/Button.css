@@ -1,0 +1,21 @@
+
+.button{
+    padding: 0.5em 1.1em;
+    border-radius: 8px;
+    border: none;
+
+    background-color: #F7B345;
+
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.button:hover{
+    background-color: #f8a828;
+}
+
+.button:active{
+    background-color: #f1a01c;
+}
+
+/* &M[i*c + j] */

@@ -1,0 +1,34 @@
+
+textarea{
+    resize: none;
+    width: 100%;
+    aspect-ratio: 1 / 1.41;
+    font-size: 1.5rem;
+
+    outline: none;
+    border: 2px solid #000;
+
+    transition: 0.3s;
+    padding: 0.2em 0.5em;
+}
+
+textarea:hover{
+    border: 3px solid #ffda9e;
+}
+
+textarea:focus{
+
+    border: 3px solid #fac36c;
+}
+
+.TextArea{
+    display: flex;
+    margin-top: 0.1em;
+    margin-bottom: 0.5em;
+
+    
+}
+
+
+
+
